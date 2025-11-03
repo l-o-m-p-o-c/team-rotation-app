@@ -1,127 +1,155 @@
 <!DOCTYPE html>
 <html lang="bg">
 <head>
-  <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Team Rotation</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Team Rotation Optimizer</title>
+    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+    <meta name="theme-color" content="#2563eb">
+    <link rel="icon" href="{{ url_for('static', filename='logo.png') }}">
+    <style>
+        body {
+            font-family: system-ui, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #f8fafc;
+            color: #111827;
+            text-align: center;
+        }
 
-  <style>
-    /* 🎨 Основни цветове – можеш да ги смениш тук */
-    :root {
-      --main-color: #2563eb;     /* син - основен */
-      --accent-color: #60a5fa;   /* по-светъл син */
-      --bg-color: #f8fafc;       /* светлосив фон */
-      --hover-color: #dbeafe;    /* фон при hover */
-    }
+        header {
+            background: #2563eb;
+            color: white;
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
 
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      background: var(--bg-color);
-      margin: 0;
-      padding: 0;
-      text-align: center;
-    }
+        header img {
+            height: 40px;
+            width: auto;
+        }
 
-    header {
-      background: white;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-      padding: 10px;
-    }
+        main {
+            padding: 1.5rem;
+            max-width: 500px;
+            margin: auto;
+        }
 
-    header img {
-      max-height: 60px;
-    }
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            background: white;
+            padding: 1.5rem;
+            border-radius: 1rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
 
-    table {
-      width: 95%;
-      margin: 20px auto;
-      border-collapse: collapse;
-      background: white;
-      border-radius: 10px;
-      overflow: hidden;
-    }
+        label {
+            font-weight: 500;
+            display: block;
+            text-align: left;
+            margin-bottom: 0.25rem;
+        }
 
-    th, td {
-      border: 1px solid #ccc;
-      padding: 10px;
-      text-align: center;
-    }
+        input[type="number"] {
+            width: 100%;
+            padding: 0.4rem 0.6rem;
+            font-size: 1rem;
+            border-radius: 0.5rem;
+            border: 1px solid #d1d5db;
+            text-align: center;
+            max-width: 100px;
+            margin: auto;
+        }
 
-    th {
-      background: var(--main-color);
-      color: white;
-    }
+        button {
+            background: #2563eb;
+            color: white;
+            font-size: 1.1rem;
+            padding: 0.6rem 1rem;
+            border: none;
+            border-radius: 0.6rem;
+            cursor: pointer;
+            transition: background 0.2s ease-in-out;
+        }
 
-    tr:hover {
-      background-color: var(--hover-color);
-    }
+        button:hover {
+            background: #1d4ed8;
+        }
 
-    @media (max-width: 700px) {
-      table {
-        font-size: 14px;
-      }
-      header img {
-        max-height: 40px;
-      }
-    }
+        .result {
+            margin-top: 1.5rem;
+            text-align: left;
+            background: #fff;
+            border-radius: 1rem;
+            padding: 1rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            overflow-x: auto;
+        }
 
-    .footer {
-      margin-top: 15px;
-      color: #555;
-    }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 0.5rem;
+        }
 
-    .repeats-info {
-      font-weight: bold;
-      color: var(--main-color);
-    }
-  </style>
+        th, td {
+            border: 1px solid #e5e7eb;
+            padding: 0.5rem;
+            text-align: center;
+        }
+
+        tr:hover {
+            background-color: #f1f5f9;
+        }
+
+        @media (max-width: 480px) {
+            input[type="number"] {
+                max-width: 80px;
+                font-size: 1rem;
+            }
+
+            button {
+                font-size: 1rem;
+                padding: 0.5rem;
+            }
+
+            .result {
+                font-size: 0.95rem;
+            }
+        }
+    </style>
 </head>
 <body>
+    <header>
+        <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo">
+        <h1>Team Rotation Optimizer</h1>
+    </header>
 
-  <!-- 🏷️ Лого най-горе -->
-  <header>
-    <img src="{{ url_for('static', filename='logo.png') }}" alt="Company Logo">
-  </header>
+    <main>
+        <form method="POST">
+            <div>
+                <label for="locations">Локации:</label>
+                <input type="number" id="locations" name="locations" min="1" required>
+            </div>
 
-  <h2>Team Rotation Scheduler</h2>
+            <div>
+                <label for="teams">Отбори:</label>
+                <input type="number" id="teams" name="teams" min="2" required>
+            </div>
 
-  <form method="post">
-    <label>Локации: <input type="number" name="locations" required min="1"></label>
-    <label>Отбори: <input type="number" name="teams" required min="2"></label>
-    <button type="submit">Генерирай</button>
-  </form>
+            <button type="submit">Генерирай разпределение</button>
+        </form>
 
-  {% if result %}
-  <div class="result">
-    <h3>Резултат:</h3>
-    <table>
-      <tr>
-        <th>Round</th>
-        {% for loc in result.locations %}
-          <th>{{ loc }}</th>
-        {% endfor %}
-        <th>💤 Почиващи</th>
-      </tr>
-      {% for r in range(result.rounds|length) %}
-      <tr>
-        <td><b>{{ r+1 }}</b></td>
-        {% for cell in result.rounds[r] %}
-          <td>{{ cell }}</td>
-        {% endfor %}
-        <td>{{ result.resting[r] }}</td>
-      </tr>
-      {% endfor %}
-    </table>
-
-    <!-- ℹ️ Инфо за повтарящите се двубои -->
-    <p class="repeats-info">Повтарящи се двубои: {{ result.repeats }}</p>
-  </div>
-  {% endif %}
-
-  <div class="footer">
-    <p>© 2025 Small Theatre Company</p>
-  </div>
-
+        {% if result %}
+        <div class="result">
+            {{ result|safe }}
+        </div>
+        {% endif %}
+    </main>
 </body>
 </html>
