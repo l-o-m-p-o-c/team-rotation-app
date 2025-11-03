@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Team Rotation Optimizer</title>
+  <style>
+    body { font-family: sans-serif; margin: 40px; }
+    input { margin: 5px; padding: 5px; }
+    button { padding: 6px 12px; }
+    .result { margin-top: 20px; background: #f0f0f0; padding: 10px; border-radius: 8px; }
+  </style>
+</head>
+<body>
+  <h2>Team Rotation Optimizer</h2>
+  <form method="POST">
+    <label>Брой локации (L):</label>
+    <input type="number" name="locations" required><br>
+    <label>Брой отбори (T):</label>
+    <input type="number" name="teams" required><br>
+    <button type="submit">Изчисли</button>
+  </form>
+
+  {% if result %}
+  <div class="result">
+    {{ result|safe }}
+  </div>
+  {% endif %}
+</body>
+</html>
