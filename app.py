@@ -47,12 +47,14 @@ def index():
                 ) == 1)
 
         total_repeats = []
+        pair_repeat_count = defaultdict(int)
         for i, j in combinations(TEAMS, 2):
             cnt = model.NewIntVar(0, ROUNDS, f"cnt_{i}_{j}")
             model.Add(cnt == sum(x[r, l, i, j] for r in range(ROUNDS) for l in range(L)))
             over = model.NewIntVar(0, ROUNDS, f"over_{i}_{j}")
             model.Add(over >= cnt - 1)
             total_repeats.append(over)
+
         model.Minimize(sum(total_repeats))
 
         solver = cp_model.CpSolver()
@@ -60,30 +62,37 @@ def index():
         solver.parameters.num_search_workers = 8
 
         result = solver.Solve(model)
-        output_lines = []
 
         if result in (cp_model.OPTIMAL, cp_model.FEASIBLE):
-            output_lines.append(f"✅ Решение за {T} отбора, {L} локации и {ROUNDS} рунда<br>")
-            rounds_data = defaultdict(list)
+            rounds_data = []
+            resting_data = []
+            total_repeats_found = 0
             for r in range(ROUNDS):
-                output_lines.append(f"<br><b>Round {r+1}:</b><br>")
+                row = []
                 playing_teams = set()
                 for l in range(L):
                     found = [(i, j) for i, j in combinations(TEAMS, 2) if solver.Value(x[r, l, i, j])]
                     if found:
                         i, j = found[0]
-                        output_lines.append(f"{LOCATIONS[l]}: ({i+1},{j+1})<br>")
-                        rounds_data[r].append((i+1, j+1))
+                        row.append(f"({i+1},{j+1})")
                         playing_teams.update([i+1, j+1])
+                        pair_repeat_count[(i+1, j+1)] += 1
                     else:
-                        output_lines.append(f"{LOCATIONS[l]}: —<br>")
+                        row.append("—")
+                rounds_data.append(row)
                 resting = [t+1 for t in TEAMS if t+1 not in playing_teams]
-                if resting:
-                    output_lines.append(f"💤 Почиващи: {resting}<br>")
-        else:
-            output_lines.append("❌ Няма намерено решение.<br>")
+                resting_data.append(resting)
 
-        result_text = "".join(output_lines)
+            total_repeats_found = sum(v - 1 for v in pair_repeat_count.values() if v > 1)
+
+            result_text = {
+                "rounds": rounds_data,
+                "resting": resting_data,
+                "locations": LOCATIONS,
+                "repeats": total_repeats_found,
+            }
+        else:
+            result_text = None
 
     return render_template("index.html", result=result_text)
 
