@@ -1,0 +1,24 @@
+# Python cache & environments
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+ENV/
+.venv/
+venv.bak/
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Logs / temp
+*.log
+*.tmp
+
+# Git Help Files 
+git-hlp.txt
