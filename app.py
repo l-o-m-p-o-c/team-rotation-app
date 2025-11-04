@@ -58,8 +58,10 @@ def index():
         model.Minimize(sum(total_repeats))
 
         solver = cp_model.CpSolver()
-        solver.parameters.max_time_in_seconds = 240  # ⏱ увеличено време до 2 минути
-        solver.parameters.num_search_workers = 8
+        solver.parameters.max_time_in_seconds = 240  # ⏱ увеличено време до 4 минути
+        import multiprocessing
+        solver.parameters.num_search_workers = multiprocessing.cpu_count()
+
 
         result = solver.Solve(model)
 
@@ -101,5 +103,9 @@ def index():
 
     return render_template("index.html", result=result_data)
 
+import os
+
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=10000)
+    port = int(os.environ.get("PORT", 5000))  # Render задава порта автоматично
+    app.run(host="0.0.0.0", port=port)
+
