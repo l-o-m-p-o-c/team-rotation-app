@@ -58,7 +58,7 @@ def index():
         model.Minimize(sum(total_repeats))
 
         solver = cp_model.CpSolver()
-        solver.parameters.max_time_in_seconds = 30
+        solver.parameters.max_time_in_seconds = 120  # ⏱ до 2 минути
         solver.parameters.num_search_workers = 8
 
         result = solver.Solve(model)
@@ -66,8 +66,7 @@ def index():
         if result in (cp_model.OPTIMAL, cp_model.FEASIBLE):
             rounds_data = []
             resting_data = []
-            total_repeats_found = 0
-            repeats_detail = []
+            pair_repeat_count = defaultdict(int)
 
             for r in range(ROUNDS):
                 row = []
@@ -82,8 +81,7 @@ def index():
                     else:
                         row.append("—")
                 rounds_data.append(row)
-                resting = [t+1 for t in TEAMS if t+1 not in playing_teams]
-                resting_data.append(resting)
+                resting_data.append([t+1 for t in TEAMS if t+1 not in playing_teams])
 
             total_repeats_found = sum(v - 1 for v in pair_repeat_count.values() if v > 1)
             repeats_detail = [f"({a},{b}) – {v} пъти" for (a,b),v in pair_repeat_count.items() if v > 1]
@@ -94,6 +92,8 @@ def index():
                 "locations": LOCATIONS,
                 "repeats": total_repeats_found,
                 "repeats_detail": repeats_detail,
+                "locations_count": L,
+                "teams_count": T,
             }
 
     return render_template("index.html", result=result_data)
