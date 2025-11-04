@@ -1,155 +1,202 @@
 <!DOCTYPE html>
 <html lang="bg">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Team Rotation Optimizer</title>
-    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
-    <meta name="theme-color" content="#2563eb">
-    <link rel="icon" href="{{ url_for('static', filename='logo.png') }}">
+
     <style>
         body {
-            font-family: system-ui, sans-serif;
-            margin: 0;
-            padding: 0;
+            font-family: system-ui, -apple-system, "Segoe UI", Roboto;
             background: #f8fafc;
             color: #111827;
-            text-align: center;
+            margin: 0;
+            padding: 0;
         }
-
         header {
             background: #2563eb;
-            color: white;
-            padding: 1rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
+            color: #fff;
+            padding: 12px;
+            text-align: center;
         }
-
         header img {
             height: 40px;
-            width: auto;
+            border-radius: 6px;
+            vertical-align: middle;
         }
-
         main {
-            padding: 1.5rem;
-            max-width: 500px;
-            margin: auto;
+            max-width: 960px;
+            margin: 20px auto;
+            padding: 0 16px;
         }
-
         form {
             display: flex;
             flex-direction: column;
-            gap: 1rem;
-            background: white;
-            padding: 1.5rem;
-            border-radius: 1rem;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            align-items: center;
+            gap: 12px;
         }
-
+        @media (orientation: landscape) {
+            form {
+                flex-direction: row;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            .field { margin-right: 16px; }
+        }
         label {
-            font-weight: 500;
-            display: block;
-            text-align: left;
-            margin-bottom: 0.25rem;
+            font-size: 0.95rem;
+            color: #6b7280;
         }
-
-        input[type="number"] {
-            width: 100%;
-            padding: 0.4rem 0.6rem;
-            font-size: 1rem;
-            border-radius: 0.5rem;
-            border: 1px solid #d1d5db;
+        input {
+            width: 80px;
+            padding: 6px 8px;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
             text-align: center;
-            max-width: 100px;
-            margin: auto;
         }
-
         button {
             background: #2563eb;
             color: white;
-            font-size: 1.1rem;
-            padding: 0.6rem 1rem;
             border: none;
-            border-radius: 0.6rem;
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-size: 1rem;
             cursor: pointer;
-            transition: background 0.2s ease-in-out;
         }
-
-        button:hover {
-            background: #1d4ed8;
-        }
-
-        .result {
-            margin-top: 1.5rem;
-            text-align: left;
-            background: #fff;
-            border-radius: 1rem;
-            padding: 1rem;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-            overflow-x: auto;
-        }
-
+        button:hover { background: #60a5fa; }
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 0.5rem;
+            margin-top: 20px;
         }
-
         th, td {
             border: 1px solid #e5e7eb;
-            padding: 0.5rem;
+            padding: 8px;
             text-align: center;
         }
+        th {
+            background: #2563eb;
+            color: white;
+        }
+        tr:nth-child(even) { background: #fff; }
+        tr:hover { background: #f1f5f9; }
 
-        tr:hover {
-            background-color: #f1f5f9;
+        footer {
+            text-align: center;
+            color: #6b7280;
+            margin: 24px 0;
+            font-size: 0.9rem;
         }
 
-        @media (max-width: 480px) {
-            input[type="number"] {
-                max-width: 80px;
-                font-size: 1rem;
-            }
+        /* Индикация при изчисление */
+        #loading {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+            font-size: 1.1rem;
+            color: #2563eb;
+        }
+        .dot {
+            animation: blink 1.5s infinite;
+        }
+        @keyframes blink {
+            0%, 80%, 100% { opacity: 0; }
+            40% { opacity: 1; }
+        }
 
-            button {
-                font-size: 1rem;
-                padding: 0.5rem;
-            }
-
-            .result {
-                font-size: 0.95rem;
-            }
+        .repeats-list {
+            margin-top: 12px;
+            list-style: none;
+            padding: 0;
+        }
+        .repeats-list li {
+            background: #f1f5f9;
+            margin: 4px 0;
+            padding: 6px 10px;
+            border-radius: 6px;
         }
     </style>
+
+    <script>
+        function showLoading() {
+            document.getElementById('loading').style.display = 'block';
+        }
+        // Анимация с 3 точки
+        let dots = 0;
+        setInterval(() => {
+            const el = document.getElementById('dots');
+            if (!el) return;
+            dots = (dots + 1) % 4;
+            el.textContent = '.'.repeat(dots);
+        }, 500);
+    </script>
 </head>
 <body>
     <header>
-        <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo">
-        <h1>Team Rotation Optimizer</h1>
+        <img src="{{ url_for('static', filename='logo.png') }}" alt="logo"> 
+        <h2 style="display:inline-block; margin-left:8px;">Team Rotation Optimizer</h2>
     </header>
 
     <main>
-        <form method="POST">
-            <div>
+        <form method="POST" onsubmit="showLoading()">
+            <div class="field">
                 <label for="locations">Локации:</label>
-                <input type="number" id="locations" name="locations" min="1" required>
+                <input id="locations" name="locations" type="number" min="1" required>
             </div>
-
-            <div>
+            <div class="field">
                 <label for="teams">Отбори:</label>
-                <input type="number" id="teams" name="teams" min="2" required>
+                <input id="teams" name="teams" type="number" min="2" required>
             </div>
-
-            <button type="submit">Генерирай разпределение</button>
+            <button type="submit">ГЕНЕРИРАЙ</button>
         </form>
 
+        <div id="loading">Изчислява<span id="dots"></span></div>
+
         {% if result %}
-        <div class="result">
-            {{ result|safe }}
+        <div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Рунд</th>
+                        {% for loc in result.locations %}
+                        <th>{{ loc }}</th>
+                        {% endfor %}
+                        <th>Почиващи</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for r in range(result.rounds|length) %}
+                    <tr>
+                        <td>{{ r+1 }}</td>
+                        {% for match in result.rounds[r] %}
+                        <td>{{ match }}</td>
+                        {% endfor %}
+                        <td>
+                            {% if result.resting[r] %}
+                            {{ result.resting[r] }}
+                            {% else %}
+                            —
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            {% if result.repeats_detail %}
+            <h3>Повтарящи се двубои ({{ result.repeats }}):</h3>
+            <ul class="repeats-list">
+                {% for item in result.repeats_detail %}
+                <li>{{ item }}</li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <p>Няма повтарящи се двубои 🎉</p>
+            {% endif %}
         </div>
         {% endif %}
     </main>
+
+    <footer>© 2025 Made by lompoc</footer>
 </body>
 </html>

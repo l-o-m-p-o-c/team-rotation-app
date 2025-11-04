@@ -8,7 +8,7 @@ app = Flask(__name__)
 
 @app.route("/", methods=["GET", "POST"])
 def index():
-    result_text = ""
+    result_data = None
     if request.method == "POST":
         L = int(request.form["locations"])
         T = int(request.form["teams"])
@@ -67,6 +67,8 @@ def index():
             rounds_data = []
             resting_data = []
             total_repeats_found = 0
+            repeats_detail = []
+
             for r in range(ROUNDS):
                 row = []
                 playing_teams = set()
@@ -84,17 +86,17 @@ def index():
                 resting_data.append(resting)
 
             total_repeats_found = sum(v - 1 for v in pair_repeat_count.values() if v > 1)
+            repeats_detail = [f"({a},{b}) – {v} пъти" for (a,b),v in pair_repeat_count.items() if v > 1]
 
-            result_text = {
+            result_data = {
                 "rounds": rounds_data,
                 "resting": resting_data,
                 "locations": LOCATIONS,
                 "repeats": total_repeats_found,
+                "repeats_detail": repeats_detail,
             }
-        else:
-            result_text = None
 
-    return render_template("index.html", result=result_text)
+    return render_template("index.html", result=result_data)
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=10000)
