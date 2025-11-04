@@ -1,3 +1,4 @@
+import os
 from flask import Flask, render_template, request
 from ortools.sat.python import cp_model
 from itertools import combinations
@@ -102,8 +103,6 @@ def index():
             }
 
     return render_template("index.html", result=result_data)
-
-import os
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))  # Render задава порта автоматично

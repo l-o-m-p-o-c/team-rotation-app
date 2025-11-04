@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="bg">
 <head>
+    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <meta name="screen-orientation" content="auto" />
@@ -27,6 +28,19 @@
             height: 40px;
             border-radius: 6px;
             vertical-align: middle;
+        }
+            /* Съществуващ стил за header h2 */
+        header h2 {
+            display: inline-block;
+            margin-left: 8px;
+            font-size: 1.5rem; /* десктоп размер */
+        }
+
+            /* Мобилни устройства – заглавието се „свива“ като h3 */
+        @media (max-width: 480px) {
+            header h2 {
+                font-size: 1.17rem; /* приблизително като h3 */
+                }
         }
         main {
             max-width: 960px;
