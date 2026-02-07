@@ -136,30 +136,6 @@
             text-align: center;
             font-size: 1.1rem;
         }
-        .flexible-locations {
-            margin-top: 16px;
-            padding: 12px;
-            background: #f0f9ff;
-            border-radius: 8px;
-            display: none;
-        }
-        .flexible-locations.visible {
-            display: block;
-        }
-        .checkbox-group {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px;
-            margin-top: 8px;
-        }
-        .checkbox-item {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-        .checkbox-item input[type="checkbox"] {
-            width: auto;
-        }
     </style>
 
     <script>
@@ -174,29 +150,6 @@
             dots = (dots + 1) % 4;
             el.textContent = '.'.repeat(dots);
         }, 500);
-
-        function updateFlexibleLocations() {
-            const locCount = parseInt(document.getElementById('locations').value);
-            const container = document.getElementById('flexible-locations');
-            const checkboxGroup = document.getElementById('checkbox-group');
-            
-            if (locCount > 0) {
-                container.classList.add('visible');
-                checkboxGroup.innerHTML = '';
-                
-                for (let i = 1; i <= locCount; i++) {
-                    const div = document.createElement('div');
-                    div.className = 'checkbox-item';
-                    div.innerHTML = `
-                        <input type="checkbox" id="flex_${i}" name="flexible" value="${i}">
-                        <label for="flex_${i}">L${i} (гъвкава)</label>
-                    `;
-                    checkboxGroup.appendChild(div);
-                }
-            } else {
-                container.classList.remove('visible');
-            }
-        }
     </script>
 </head>
 <body>
@@ -209,16 +162,11 @@
         <form method="POST" onsubmit="showLoading()">
             <div class="field">
                 <label for="locations">Локации:</label>
-                <input id="locations" name="locations" type="number" min="1" required onchange="updateFlexibleLocations()">
+                <input id="locations" name="locations" type="number" min="1" required>
             </div>
             <div class="field">
-                <label for="teams">Отбори:</label>
-                <input id="teams" name="teams" type="number" min="2" required>
-            </div>
-            
-            <div id="flexible-locations" class="flexible-locations">
-                <label style="font-weight: bold; color: #1e40af;">Гъвкави локации (2 или 3 отбора):</label>
-                <div id="checkbox-group" class="checkbox-group"></div>
+                <label for="teams">Отбори (четен брой):</label>
+                <input id="teams" name="teams" type="number" min="2" step="2" required>
             </div>
             
             <div style="width:100%; text-align:center;">
@@ -237,11 +185,6 @@
         {% if result %}
         <div>
             <h3>Въведени данни: {{ result.L }} локации, {{ result.T }} отбора</h3>
-            {% if result.flexible %}
-            <p style="background: #f0f9ff; padding: 8px; border-radius: 6px; color: #1e40af;">
-                🔄 Гъвкави локации: {{ result.flexible|join(', ') }} (могат да приемат 2 или 3 отбора)
-            </p>
-            {% endif %}
             <div class="table-wrapper">
                 <table>
                     <thead>
@@ -250,7 +193,6 @@
                             {% for loc in result.locations %}
                             <th>{{ loc }}</th>
                             {% endfor %}
-                            <th>Почиващи</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -260,11 +202,6 @@
                             {% for match in result.rounds[r] %}
                             <td>{{ match }}</td>
                             {% endfor %}
-                            <td>
-                                {% if result.resting[r] %}
-                                {{ result.resting[r] }}
-                                {% else %} — {% endif %}
-                            </td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -281,16 +218,6 @@
             {% else %}
             <p>Няма повтарящи се двубои 🎉</p>
             {% endif %}
-
-            <div style="margin-top: 20px; padding: 12px; background: #f0fdf4; border-radius: 8px; border: 1px solid #86efac;">
-                <h4 style="margin: 0 0 8px 0; color: #166534;">📊 Статистика за почиващи отбори:</h4>
-                <p style="margin: 4px 0; color: #166534;">
-                    • Общо почиващи: <strong>{{ result.total_resting }}</strong> (от {{ result.L * result.T }} възможни места)
-                </p>
-                <p style="margin: 4px 0; color: #166534;">
-                    • Средно на рунд: <strong>{{ result.avg_resting }}</strong> отбора
-                </p>
-            </div>
         </div>
         {% endif %}
     </main>

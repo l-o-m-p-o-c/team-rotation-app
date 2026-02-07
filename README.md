@@ -1,13 +1,24 @@
-# 🌀 Team Rotation Optimizer
+# 🌀 Team Rotation Optimizer (v1-simple)
 
-A Python-based scheduling optimizer that generates fair team rotations across multiple locations and rounds, minimizing repeated matchups. Supports flexible locations that can accommodate 2 or 3 teams simultaneously.
+**Simplified version** - A Python-based scheduling optimizer that generates fair team rotations across multiple locations and rounds, minimizing repeated matchups.
 
 ## ⚙️ How it works
-- Input number of teams and locations.
-- Mark locations as "flexible" to allow 2 or 3 teams (e.g., relay races).
-- The system automatically calculates the minimal number of rounds.
-- Produces a schedule showing which teams play each round and which rest.
-- Minimizes repeated matchups and resting teams.
+- Input number of teams (even number) and locations.
+- Each location hosts exactly 2 teams per round.
+- Number of teams must not exceed 2 × number of locations.
+- No resting teams - all teams play every round.
+- Minimizes repeated matchups between teams.
+
+## 🔒 Constraints
+
+**Hard constraints:**
+- Each team visits each location exactly once
+- Each location hosts exactly 2 teams (one pair) per round
+- Teams count must be even number
+- Teams ≤ 2 × Locations
+
+**Soft constraints:**
+- Minimize repeated matchups between same teams
 
 ## 🚀 Run locally
 1. Clone the repository  
@@ -50,62 +61,24 @@ This application **does not use a database**. All calculations are performed in-
 
 ## 🛠️ Technology Stack
 - **Backend**: Flask (Python web framework)
-- **Optimization**: Google OR-Tools CP-SAT solver with multi-objective optimization
+- **Optimization**: Google OR-Tools CP-SAT solver
 - **Frontend**: HTML, CSS, JavaScript (no framework)
-- **Deployment**: Render.com (configured via .render.yaml)
 
 ## 📊 Example Output
 
-**Input:** 5 teams, 2 locations (both flexible)
+**Input:** 6 teams, 3 locations
 
 **Result:**
-- 2 rounds (instead of 3 with regular locations)
-- Location 1 hosts triple (1,2,3) in Round 1
-- Location 2 hosts pair (4,5) in Round 1
-- Minimal resting teams
-- No repeated matchups
+- 3 rounds (each team visits each location once)
+- All teams play every round
+- Minimal repeated matchups
 
 ## 🔧 How it works
-1. User inputs number of teams and locations via web form
-2. User marks which locations are "flexible" (can accommodate 2 or 3 teams)
+1. User inputs number of teams (even) and locations via web form
+2. Validates: teams is even, teams ≤ 2 × locations
 3. Flask receives the POST request
 4. OR-Tools solver creates a constraint satisfaction problem with:
-   - **Hard constraints**: Each team visits each location exactly once, max one event per location per round
-   - **Soft constraints**: Minimize repeated matchups, minimize resting teams, prefer pairs over triples
+   - **Hard constraints**: Each team visits each location exactly once, exactly 2 teams per location per round
+   - **Soft constraint**: Minimize repeated matchups
 5. Solver generates optimal schedule
-6. Results are displayed in a table showing rounds, locations, and resting teams
-
-## 🎯 Optimization Goals (Weighted)
-
-The solver optimizes multiple objectives with priority weighting:
-
-```
-Objective = 1000 × (repeated_matchups) + 10 × (triple_events) + 1 × (resting_teams)
-```
-
-**Priority hierarchy:**
-1. **Highest (weight 1000):** Minimize repeated matchups between same teams
-2. **Medium (weight 10):** Prefer pairs (2 teams) over triples (3 teams) on flexible locations
-3. **Lowest (weight 1):** Minimize total number of resting teams across all rounds
-
-This means the solver will:
-- Never sacrifice matchup quality to reduce resting teams
-- Use triple events only when necessary (to fit schedule or avoid repeats)
-- Prefer compact schedules with fewer resting teams when matchup quality is equal
-
-## 🔒 Hard Constraints
-
-1. **One event per location per round**: Each location hosts at most one event (pair or triple) per round
-2. **One appearance per team per round**: Each team plays at most once per round
-3. **Visit each location once**: Every team must visit every location exactly once throughout the schedule
-4. **Flexible location capacity**: 
-   - Regular locations: exactly 2 teams (pairs only)
-   - Flexible locations: 2 or 3 teams (solver chooses optimally)
-
-## ✨ Features
-
-- **Flexible locations**: Mark locations that can host 2 or 3 teams competing simultaneously (e.g., relay races, multi-team challenges)
-- **Adaptive round calculation**: Automatically computes minimum rounds needed based on teams, locations, and flexible capacity
-- **No-solution handling**: Clear error message when constraints cannot be satisfied
-- **Statistics display**: Shows total resting teams, average per round, and matchup repetitions
-- **Multi-core solving**: Uses all available CPU cores for faster optimization (max 4 minutes timeout)
+6. Results are displayed in a table showing rounds and locations
