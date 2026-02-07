@@ -58,7 +58,15 @@ team-rotation-app/
 ```
 
 ## 🗄️ Database
-This application **does not use a database**. All calculations are performed in-memory using Google OR-Tools constraint programming solver. Each request is stateless.
+This application uses **SQLite** for caching optimization results. Results are stored locally in `cache.db` and reused when the same team/location combination is requested again.
+
+**Cache behavior:**
+- First request: Computes solution using OR-Tools (~2-5 seconds)
+- Subsequent requests: Loads from cache (~0.001 seconds for DB access)
+- Cache persists between sessions and restarts
+- Shared across all users when deployed
+
+**Cache file:** `cache.db` (created automatically on first run)
 
 ## 🛠️ Technology Stack
 - **Backend**: Flask (Python web framework)
@@ -86,9 +94,12 @@ This application **does not use a database**. All calculations are performed in-
 ## 🔧 How it works
 1. User inputs number of teams (even) and locations via web form
 2. Validates: teams is even, teams ≤ 2 × locations
-3. Flask receives the POST request
-4. OR-Tools solver creates a constraint satisfaction problem with:
+3. **Checks SQLite cache** for existing solution with same parameters
+4. If cached: Returns result instantly (⚡ indicator shown)
+5. If not cached: Flask receives the POST request and calls OR-Tools solver
+6. OR-Tools solver creates a constraint satisfaction problem with:
    - **Hard constraints**: Each team visits each location exactly once, maximum 1 pair per location per round (locations can be empty)
    - **Soft constraint**: Minimize repeated matchups
-5. Solver generates optimal schedule
-6. Results are displayed in a table showing rounds and locations (empty locations shown as "—")
+7. Solver generates optimal schedule
+8. **Result is saved to cache** for future requests
+9. Results are displayed in a table showing rounds and locations (empty locations shown as "—")
