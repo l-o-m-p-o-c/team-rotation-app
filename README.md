@@ -103,3 +103,36 @@ This application uses **SQLite** for caching optimization results. Results are s
 7. Solver generates optimal schedule
 8. **Result is saved to cache** for future requests
 9. Results are displayed in a table showing rounds and locations (empty locations shown as "—")
+
+## 🚀 Deploy to Render.com
+
+**Quick Deploy:**
+
+1. Push your code to GitHub
+   ```bash
+   git push origin v1-simple
+   ```
+
+2. Go to [render.com](https://render.com) and sign in with GitHub
+
+3. Click **"New +"** → **"Web Service"**
+
+4. Connect your repository: `team-rotation-app`
+
+5. Render will auto-detect `.render.yaml` configuration
+
+6. Click **"Create Web Service"**
+
+7. Wait for deployment (~2-3 minutes)
+
+8. Your app will be live at `https://team-rotation-app.onrender.com`
+
+**Important:** The free plan includes:
+- ✅ Persistent disk for SQLite (cache preserved)
+- ✅ HTTPS/SSL automatically
+- ✅ Custom domain support
+- ⚠️ Sleeps after 15 min of inactivity (first request takes ~30s)
+
+**For production:**
+- Upgrade to paid plan ($7/month) for always-on service
+- Or use Railway.app (similar setup, different pricing)
