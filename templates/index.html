@@ -185,6 +185,11 @@
         {% if result %}
         <div>
             <h3>Въведени данни: {{ result.L }} локации, {{ result.T }} отбора</h3>
+            {% if result.from_cache %}
+            <p style="background: #f0f9ff; padding: 8px; border-radius: 6px; color: #1e40af;">
+                ⚡ Резултатът е зареден от кеша (моментално)
+            </p>
+            {% endif %}
             <div class="table-wrapper">
                 <table>
                     <thead>
