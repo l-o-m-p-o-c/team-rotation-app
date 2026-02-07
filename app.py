@@ -40,10 +40,10 @@ def index():
                 for i, j in combinations(TEAMS, 2):
                     x[(r, l, i, j)] = model.NewBoolVar(f"x_{r}_{l}_{i}_{j}")
 
-        # 1️⃣ Едно събитие на локация (точно една двойка)
+        # 1️⃣ Максимум едно събитие на локация (позволява празни локации)
         for r in range(ROUNDS):
             for l in range(L):
-                model.Add(sum(x[r, l, i, j] for i, j in combinations(TEAMS, 2)) == 1)
+                model.Add(sum(x[r, l, i, j] for i, j in combinations(TEAMS, 2)) <= 1)
 
         # 2️⃣ Всеки отбор максимум веднъж на рунд
         for r in range(ROUNDS):

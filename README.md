@@ -4,16 +4,17 @@
 
 ## ⚙️ How it works
 - Input number of teams (even number) and locations.
-- Each location hosts exactly 2 teams per round.
+- Each location hosts maximum 2 teams per round (can be empty).
 - Number of teams must not exceed 2 × number of locations.
 - No resting teams - all teams play every round.
+- Some locations may remain empty if teams < 2 × locations.
 - Minimizes repeated matchups between teams.
 
 ## 🔒 Constraints
 
 **Hard constraints:**
 - Each team visits each location exactly once
-- Each location hosts exactly 2 teams (one pair) per round
+- Each location hosts maximum 1 pair (2 teams) per round (can be empty)
 - Teams count must be even number
 - Teams ≤ 2 × Locations
 
@@ -70,7 +71,16 @@ This application **does not use a database**. All calculations are performed in-
 
 **Result:**
 - 3 rounds (each team visits each location once)
+- All teams play every round (6 teams = 2 × 3 locations)
+- No empty locations
+- Minimal repeated matchups
+
+**Input:** 4 teams, 3 locations
+
+**Result:**
+- 3 rounds
 - All teams play every round
+- One location remains empty each round (4 teams = 2 pairs, 3 locations)
 - Minimal repeated matchups
 
 ## 🔧 How it works
@@ -78,7 +88,7 @@ This application **does not use a database**. All calculations are performed in-
 2. Validates: teams is even, teams ≤ 2 × locations
 3. Flask receives the POST request
 4. OR-Tools solver creates a constraint satisfaction problem with:
-   - **Hard constraints**: Each team visits each location exactly once, exactly 2 teams per location per round
+   - **Hard constraints**: Each team visits each location exactly once, maximum 1 pair per location per round (locations can be empty)
    - **Soft constraint**: Minimize repeated matchups
 5. Solver generates optimal schedule
-6. Results are displayed in a table showing rounds and locations
+6. Results are displayed in a table showing rounds and locations (empty locations shown as "—")
