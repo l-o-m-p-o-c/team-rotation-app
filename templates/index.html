@@ -81,6 +81,12 @@
             cursor: pointer;
         }
         button:hover { background: #60a5fa; }
+        .button-secondary {
+            background: #0f766e;
+        }
+        .button-secondary:hover {
+            background: #14b8a6;
+        }
         .table-wrapper {
             overflow-x: auto;
             margin-top: 20px;
@@ -136,6 +142,14 @@
             text-align: center;
             font-size: 1.1rem;
         }
+        .info-message {
+            background: #fffbeb;
+            border: 1px solid #f59e0b;
+            color: #92400e;
+            padding: 10px 12px;
+            border-radius: 6px;
+            margin-top: 12px;
+        }
     </style>
 
     <script>
@@ -190,6 +204,9 @@
                 ⚡ Резултатът е зареден от кеша (моментално)
             </p>
             {% endif %}
+            {% if result.no_other_solution %}
+            <p class="info-message">Няма друго решение за тези параметри.</p>
+            {% endif %}
             <div class="table-wrapper">
                 <table>
                     <thead>
@@ -223,6 +240,13 @@
             {% else %}
             <p>Няма повтарящи се двубои 🎉</p>
             {% endif %}
+
+            <form method="POST" onsubmit="showLoading()" style="margin-top:16px; text-align:center;">
+                <input type="hidden" name="locations" value="{{ result.L }}">
+                <input type="hidden" name="teams" value="{{ result.T }}">
+                <input type="hidden" name="force_new" value="1">
+                <button type="submit" class="button-secondary">НОВО РЕШЕНИЕ (СЪЩИТЕ ПАРАМЕТРИ)</button>
+            </form>
         </div>
         {% endif %}
     </main>
