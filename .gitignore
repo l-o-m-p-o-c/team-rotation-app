@@ -10,10 +10,6 @@ ENV/
 .venv/
 venv.bak/
 
-# SQLite cache (production will have its own)
-cache.db
-cache.db-journal
-
 # Test files
 test_*.py
 benchmark_*.py

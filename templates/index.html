@@ -29,18 +29,17 @@
             border-radius: 6px;
             vertical-align: middle;
         }
-            /* Съществуващ стил за header h2 */
+        /* Съществуващ стил за header h2 */
         header h2 {
             display: inline-block;
             margin-left: 8px;
             font-size: 1.5rem; /* десктоп размер */
         }
-
-            /* Мобилни устройства – заглавието се „свива“ като h3 */
+        /* Мобилни устройства – заглавието се „свива“ като h3 */
         @media (max-width: 480px) {
             header h2 {
                 font-size: 1.17rem; /* приблизително като h3 */
-                }
+            }
         }
         main {
             max-width: 960px;
@@ -85,8 +84,7 @@
             background: #0f766e;
         }
         .button-secondary:hover {
-            background: #14b8a6;
-        }
+            background: #14b8a6; }
         .table-wrapper {
             overflow-x: auto;
             margin-top: 20px;
@@ -106,14 +104,12 @@
         }
         tr:nth-child(even) { background: #fff; }
         tr:hover { background: #f1f5f9; }
-
         footer {
             text-align: center;
             color: #6b7280;
             margin: 24px 0;
             font-size: 0.9rem;
         }
-
         #loading {
             display: none;
             text-align: center;
@@ -149,6 +145,67 @@
             padding: 10px 12px;
             border-radius: 6px;
             margin-top: 12px;
+        }
+        .cache-table {
+            margin-top: 16px;
+            border-collapse: collapse;
+            width: 100%;
+        }
+        .cache-table th,
+        .cache-table td {
+            border: 1px solid #e5e7eb;
+            padding: 8px;
+            text-align: left;
+        }
+        .cache-table th {
+            background: #e0f2fe;
+            color: #0f172a;
+        }
+        .cache-links a {
+            display: inline-block;
+            margin: 0 6px 6px 0;
+            padding: 4px 8px;
+            border-radius: 6px;
+            background: #f1f5f9;
+            color: #0f172a;
+            text-decoration: none;
+        }
+        .cache-links a:hover {
+            background: #e2e8f0;
+        }
+        .cache-cell {
+            position: relative;
+            display: inline-block;
+            min-width: 28px;
+            text-align: center;
+        }
+        .variant-menu {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            z-index: 10;
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 6px 16px rgba(15, 23, 42, 0.12);
+            border-radius: 8px;
+            padding: 6px;
+            min-width: 140px;
+        }
+        .cache-cell:hover .variant-menu {
+            display: block;
+        }
+        .variant-menu a {
+            display: block;
+            margin: 2px 0;
+            padding: 4px 6px;
+            border-radius: 6px;
+            background: #f8fafc;
+            color: #0f172a;
+            text-decoration: none;
+        }
+        .variant-menu a:hover {
+            background: #e2e8f0;
         }
     </style>
 
@@ -247,6 +304,55 @@
                 <input type="hidden" name="force_new" value="1">
                 <button type="submit" class="button-secondary">НОВО РЕШЕНИЕ (СЪЩИТЕ ПАРАМЕТРИ)</button>
             </form>
+
+            <div style="margin-top:20px;">
+                <h3>Готови решения (кеш)</h3>
+                {% if cache_index and cache_index|length > 0 %}
+                <table class="cache-table">
+                    <thead>
+                        <tr>
+                            <th>Локации</th>
+                            <th>2</th>
+                            <th>4</th>
+                            <th>6</th>
+                            <th>8</th>
+                            <th>10</th>
+                            <th>12</th>
+                            <th>14</th>
+                            <th>16</th>
+                            <th>18</th>
+                            <th>20</th>
+                            <th>22</th>
+                            <th>24</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for loc, teams in cache_index.items() %}
+                        <tr>
+                            <td>Локации: {{ loc }}</td>
+                            {% for team in [2,4,6,8,10,12,14,16,18,20,22,24] %}
+                            <td class="cache-links">
+                                {% set variants = teams.get(team) %}
+                                {% if variants %}
+                                <div class="cache-cell">
+                                    <a href="{{ url_for('index', locations=loc, teams=team) }}">{{ variants|length }}</a>
+                                    <div class="variant-menu">
+                                        {% for v in variants %}
+                                        <a href="{{ url_for('index', locations=loc, teams=team, variant=v.id) }}">Вариант {{ loop.index }}</a>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                {% endif %}
+                            </td>
+                            {% endfor %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <p>Няма кеширани решения.</p>
+                {% endif %}
+            </div>
         </div>
         {% endif %}
     </main>
