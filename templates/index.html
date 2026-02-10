@@ -6,214 +6,193 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <meta name="screen-orientation" content="auto" />
     <meta name="x5-orientation" content="auto" />
-    <title>Team Rotation Optimizer</title>
+    <title>Тиймбилдинг Генератор</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='app.css') }}">
+</head>
+<body>
+    <header class="topbar">
+        <div class="brand">
+            <img src="{{ url_for('static', filename='logo.png') }}" alt="Лого">
+            <div>
+                <div class="brand-title">Тиймбилдинг Генератор</div>
+                <div class="brand-subtitle">Генератор на ротации</div>
+            </div>
+        </div>
+        <a class="back-link" href="/">Начало</a>
+    </header>
 
-    <style>
-        body {
-            font-family: system-ui, -apple-system, "Segoe UI", Roboto;
-            background: #f8fafc;
-            color: #111827;
-            margin: 0;
-            padding: 0;
-        }
-        header {
-            background: #2563eb;
-            color: #fff;
-            padding: 12px;
-            text-align: center;
-            white-space: nowrap;
-            overflow-x: auto;
-        }
-        header img {
-            height: 40px;
-            border-radius: 6px;
-            vertical-align: middle;
-        }
-        /* Съществуващ стил за header h2 */
-        header h2 {
-            display: inline-block;
-            margin-left: 8px;
-            font-size: 1.5rem; /* десктоп размер */
-        }
-        /* Мобилни устройства – заглавието се „свива“ като h3 */
-        @media (max-width: 480px) {
-            header h2 {
-                font-size: 1.17rem; /* приблизително като h3 */
-            }
-        }
-        main {
-            max-width: 960px;
-            margin: 20px auto;
-            padding: 0 16px;
-        }
-        form {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 12px;
-        }
-        @media (orientation: landscape) {
-            form {
-                flex-direction: row;
-                justify-content: center;
-            }
-            .field { margin-right: 16px; }
-        }
-        label {
-            font-size: 0.95rem;
-            color: #6b7280;
-        }
-        input {
-            width: 80px;
-            padding: 6px 8px;
-            border-radius: 8px;
-            border: 1px solid #e5e7eb;
-            text-align: center;
-        }
-        button {
-            background: #2563eb;
-            color: white;
-            border: none;
-            padding: 8px 14px;
-            border-radius: 8px;
-            font-size: 1rem;
-            cursor: pointer;
-        }
-        button:hover { background: #60a5fa; }
-        .button-secondary {
-            background: #0f766e;
-        }
-        .button-secondary:hover {
-            background: #14b8a6; }
-        .table-wrapper {
-            overflow-x: auto;
-            margin-top: 20px;
-        }
-        table {
-            border-collapse: collapse;
-            min-width: 600px;
-        }
-        th, td {
-            border: 1px solid #e5e7eb;
-            padding: 8px;
-            text-align: center;
-        }
-        th {
-            background: #2563eb;
-            color: white;
-        }
-        tr:nth-child(even) { background: #fff; }
-        tr:hover { background: #f1f5f9; }
-        footer {
-            text-align: center;
-            color: #6b7280;
-            margin: 24px 0;
-            font-size: 0.9rem;
-        }
-        #loading {
-            display: none;
-            text-align: center;
-            margin-top: 20px;
-            font-size: 1.1rem;
-            color: #2563eb;
-        }
-        .repeats-list {
-            margin-top: 12px;
-            list-style: none;
-            padding: 0;
-        }
-        .repeats-list li {
-            background: #f1f5f9;
-            margin: 4px 0;
-            padding: 6px 10px;
-            border-radius: 6px;
-        }
-        .error-message {
-            background: #fef2f2;
-            border: 2px solid #ef4444;
-            color: #991b1b;
-            padding: 16px;
-            border-radius: 8px;
-            margin-top: 20px;
-            text-align: center;
-            font-size: 1.1rem;
-        }
-        .info-message {
-            background: #fffbeb;
-            border: 1px solid #f59e0b;
-            color: #92400e;
-            padding: 10px 12px;
-            border-radius: 6px;
-            margin-top: 12px;
-        }
-        .cache-table {
-            margin-top: 16px;
-            border-collapse: collapse;
-            width: 100%;
-        }
-        .cache-table th,
-        .cache-table td {
-            border: 1px solid #e5e7eb;
-            padding: 8px;
-            text-align: left;
-        }
-        .cache-table th {
-            background: #e0f2fe;
-            color: #0f172a;
-        }
-        .cache-links a {
-            display: inline-block;
-            margin: 0 6px 6px 0;
-            padding: 4px 8px;
-            border-radius: 6px;
-            background: #f1f5f9;
-            color: #0f172a;
-            text-decoration: none;
-        }
-        .cache-links a:hover {
-            background: #e2e8f0;
-        }
-        .cache-cell {
-            position: relative;
-            display: inline-block;
-            min-width: 28px;
-            text-align: center;
-        }
-        .variant-menu {
-            display: none;
-            position: absolute;
-            top: 100%;
-            left: 0;
-            z-index: 10;
-            background: #ffffff;
-            border: 1px solid #e5e7eb;
-            box-shadow: 0 6px 16px rgba(15, 23, 42, 0.12);
-            border-radius: 8px;
-            padding: 6px;
-            min-width: 140px;
-        }
-        .cache-cell:hover .variant-menu {
-            display: block;
-        }
-        .variant-menu a {
-            display: block;
-            margin: 2px 0;
-            padding: 4px 6px;
-            border-radius: 6px;
-            background: #f8fafc;
-            color: #0f172a;
-            text-decoration: none;
-        }
-        .variant-menu a:hover {
-            background: #e2e8f0;
-        }
-    </style>
+    <main class="shell">
+        <section class="panel fade-in">
+            <div class="panel-header">
+                <h1>Генератор</h1>
+            </div>
+
+            <form method="POST" action="/generator" onsubmit="showLoading()" class="control-form">
+                <div class="field">
+                    <label for="locations">Локации (1-12)</label>
+                    <select id="locations" name="locations" required>
+                        <option value="" disabled {% if not result %}selected{% endif %}>--</option>
+                        {% for l in allowed_locations %}
+                        <option value="{{ l }}" {% if result and result.L == l %}selected{% endif %}>{{ l }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="field">
+                    <label for="teams">Отбори (четни, 2-24)</label>
+                    <select id="teams" name="teams" required>
+                        <option value="" disabled {% if not result %}selected{% endif %}>--</option>
+                        {% for t in allowed_teams %}
+                        <option value="{{ t }}" {% if result and result.T == t %}selected{% endif %}>{{ t }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                {% if result %}
+                <input type="hidden" name="current_variant_id" value="{{ result.variant_id }}">
+                <input type="hidden" name="action" value="next">
+                {% endif %}
+                <button type="submit" class="btn-primary">
+                    {% if result %}НОВО РЕШЕНИЕ{% else %}ГЕНЕРИРАЙ{% endif %}
+                </button>
+            </form>
+
+            <div id="loading" class="loading">Зарежда<span id="dots"></span></div>
+
+            {% if error %}
+            <div class="message error">{{ error }}</div>
+            {% endif %}
+
+            {% if result %}
+            <div class="result-card">
+                <div class="result-head">
+                    <div>
+                        <div class="result-title">Въведени данни: {{ result.L }} локации, {{ result.T }} отбора</div>
+                    </div>
+                    {% if no_more_variants %}
+                    <div class="message warn">Няма повече решения за тези параметри.</div>
+                    {% endif %}
+                </div>
+
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Рунд</th>
+                                {% for loc in result.locations %}
+                                <th>{{ loc }}</th>
+                                {% endfor %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for r in range(result.rounds|length) %}
+                            <tr>
+                                <td>{{ r+1 }}</td>
+                                {% for match in result.rounds[r] %}
+                                <td>{{ match }}</td>
+                                {% endfor %}
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                {% if result.repeats_detail %}
+                <h3>Повтарящи се двубои ({{ result.repeats }}):</h3>
+                <ul class="repeats-list">
+                    {% for item in result.repeats_detail %}
+                    <li>{{ item }}</li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <p>Няма повтарящи се двубои 🎉</p>
+                {% endif %}
+
+                {% if no_more_variants %}
+                <div class="actions">
+                    <a class="btn-ghost" href="/generator?locations={{ result.L }}&teams={{ result.T }}&show_all=1">ВИЖ ВСИЧКИ</a>
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+        </section>
+
+        {% if all_variants %}
+        <section class="panel fade-in">
+            <h2>Всички налични решения</h2>
+            {% for v in all_variants %}
+            <div class="variant-card">
+                <div class="variant-header">Вариант {{ loop.index }}</div>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Рунд</th>
+                                {% for loc in all_locations %}
+                                <th>{{ loc }}</th>
+                                {% endfor %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for r in range(v.rounds_data|length) %}
+                            <tr>
+                                <td>{{ r+1 }}</td>
+                                {% for match in v.rounds_data[r] %}
+                                <td>{{ match }}</td>
+                                {% endfor %}
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% if v.repeats_detail %}
+                <div class="variant-repeats">Повторения: {{ v.repeats }}</div>
+                <ul class="repeats-list">
+                    {% for item in v.repeats_detail %}
+                    <li>{{ item }}</li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <p>Няма повтарящи се двубои 🎉</p>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </section>
+        {% endif %}
+
+        <section class="panel fade-in" style="display:none;"></section>
+    </main>
+
+    <footer class="footer">© Made by lompoc</footer>
 
     <script>
         function showLoading() {
-            document.getElementById('loading').style.display = 'block';
+            const el = document.getElementById('loading');
+            if (el) {
+                el.style.display = 'block';
+            }
         }
-        // Пулсиращи точки
+        function syncTeams() {
+            const loc = document.getElementById('locations');
+            const teams = document.getElementById('teams');
+            if (!loc || !teams) return;
+            const maxTeams = parseInt(loc.value, 10) * 2;
+            Array.from(teams.options).forEach((opt) => {
+                const val = parseInt(opt.value, 10);
+                opt.disabled = val > maxTeams;
+            });
+            if (parseInt(teams.value, 10) > maxTeams) {
+                teams.value = String(maxTeams);
+            }
+        }
+        document.addEventListener('DOMContentLoaded', () => {
+            syncTeams();
+            const loc = document.getElementById('locations');
+            if (loc) {
+                loc.addEventListener('change', syncTeams);
+            }
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('/static/sw.js');
+            }
+        });
         let dots = 0;
         setInterval(() => {
             const el = document.getElementById('dots');
@@ -222,141 +201,5 @@
             el.textContent = '.'.repeat(dots);
         }, 500);
     </script>
-</head>
-<body>
-    <header>
-        <img src="{{ url_for('static', filename='logo.png') }}" alt="Лого">
-        <h2 style="display:inline-block; margin-left:8px;">Team Rotation Optimizer</h2>
-    </header>
-
-    <main>
-        <form method="POST" onsubmit="showLoading()">
-            <div class="field">
-                <label for="locations">Локации:</label>
-                <input id="locations" name="locations" type="number" min="1" required>
-            </div>
-            <div class="field">
-                <label for="teams">Отбори (четен брой):</label>
-                <input id="teams" name="teams" type="number" min="2" step="2" required>
-            </div>
-            
-            <div style="width:100%; text-align:center;">
-                <button type="submit">ГЕНЕРИРАЙ</button>
-            </div>
-        </form>
-
-        <div id="loading">Изчислява<span id="dots"></span></div>
-
-        {% if error %}
-        <div class="error-message">
-            {{ error }}
-        </div>
-        {% endif %}
-
-        {% if result %}
-        <div>
-            <h3>Въведени данни: {{ result.L }} локации, {{ result.T }} отбора</h3>
-            {% if result.from_cache %}
-            <p style="background: #f0f9ff; padding: 8px; border-radius: 6px; color: #1e40af;">
-                ⚡ Резултатът е зареден от кеша (моментално)
-            </p>
-            {% endif %}
-            {% if result.no_other_solution %}
-            <p class="info-message">Няма друго решение за тези параметри.</p>
-            {% endif %}
-            <div class="table-wrapper">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Рунд</th>
-                            {% for loc in result.locations %}
-                            <th>{{ loc }}</th>
-                            {% endfor %}
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for r in range(result.rounds|length) %}
-                        <tr>
-                            <td>{{ r+1 }}</td>
-                            {% for match in result.rounds[r] %}
-                            <td>{{ match }}</td>
-                            {% endfor %}
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-
-            {% if result.repeats_detail %}
-            <h3>Повтарящи се двубои ({{ result.repeats }}):</h3>
-            <ul class="repeats-list">
-                {% for item in result.repeats_detail %}
-                <li>{{ item }}</li>
-                {% endfor %}
-            </ul>
-            {% else %}
-            <p>Няма повтарящи се двубои 🎉</p>
-            {% endif %}
-
-            <form method="POST" onsubmit="showLoading()" style="margin-top:16px; text-align:center;">
-                <input type="hidden" name="locations" value="{{ result.L }}">
-                <input type="hidden" name="teams" value="{{ result.T }}">
-                <input type="hidden" name="force_new" value="1">
-                <button type="submit" class="button-secondary">НОВО РЕШЕНИЕ (СЪЩИТЕ ПАРАМЕТРИ)</button>
-            </form>
-
-            <div style="margin-top:20px;">
-                <h3>Готови решения (кеш)</h3>
-                {% if cache_index and cache_index|length > 0 %}
-                <table class="cache-table">
-                    <thead>
-                        <tr>
-                            <th>Локации</th>
-                            <th>2</th>
-                            <th>4</th>
-                            <th>6</th>
-                            <th>8</th>
-                            <th>10</th>
-                            <th>12</th>
-                            <th>14</th>
-                            <th>16</th>
-                            <th>18</th>
-                            <th>20</th>
-                            <th>22</th>
-                            <th>24</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for loc, teams in cache_index.items() %}
-                        <tr>
-                            <td>Локации: {{ loc }}</td>
-                            {% for team in [2,4,6,8,10,12,14,16,18,20,22,24] %}
-                            <td class="cache-links">
-                                {% set variants = teams.get(team) %}
-                                {% if variants %}
-                                <div class="cache-cell">
-                                    <a href="{{ url_for('index', locations=loc, teams=team) }}">{{ variants|length }}</a>
-                                    <div class="variant-menu">
-                                        {% for v in variants %}
-                                        <a href="{{ url_for('index', locations=loc, teams=team, variant=v.id) }}">Вариант {{ loop.index }}</a>
-                                        {% endfor %}
-                                    </div>
-                                </div>
-                                {% endif %}
-                            </td>
-                            {% endfor %}
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-                {% else %}
-                <p>Няма кеширани решения.</p>
-                {% endif %}
-            </div>
-        </div>
-        {% endif %}
-    </main>
-
-    <footer>© 2025 Made by lompoc</footer>
 </body>
 </html>

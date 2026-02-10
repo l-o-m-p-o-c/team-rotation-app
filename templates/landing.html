@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="screen-orientation" content="auto" />
+    <meta name="x5-orientation" content="auto" />
+    <title>Тиймбилдинг Генератор</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='app.css') }}">
+</head>
+<body>
+    <header class="hero">
+        <img class="hero-logo" src="{{ url_for('static', filename='logo.png') }}" alt="Лого">
+        <h1>ТИЙМБИЛДИНГ ГЕНЕРАТОР</h1>
+        <p class="hero-subtitle">{{ version }}</p>
+        <div class="hero-card">
+            <h2>Ограничения</h2>
+            <ul class="hero-list">
+                <li>Броят на отборите трябва да е четен.</li>
+                <li>Отборите трябва да са най-много 2 x локациите.</li>
+                <li>Всеки отбор посещава всяка локация точно веднъж.</li>
+                <li>На локация има максимум една двойка на рунд; празни локации са позволени.</li>
+                <li>Целта е да се минимизират повторенията, но не винаги са нула.</li>
+            </ul>
+        </div>
+        <a class="btn-primary hero-cta" href="/generator">КЪМ ГЕНЕРАТОРА</a>
+    </header>
+
+    <section class="feature-strip" style="display:none;"></section>
+
+    <footer class="footer">© Made by lompoc</footer>
+
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/static/sw.js');
+        }
+    </script>
+</body>
+</html>

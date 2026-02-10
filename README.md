@@ -2,6 +2,11 @@
 
 **Simplified version** - A Python-based scheduling optimizer that generates fair team rotations across multiple locations and rounds, minimizing repeated matchups.
 
+## ✅ Current version overview
+- Web UI (Flask) that accepts number of teams and locations and returns a round-by-round rotation table.
+- Constraint solver (OR-Tools CP-SAT) generates schedules and saves them to a local SQLite cache.
+- Results are cached by input parameters in `cache.db` to speed up repeated requests.
+
 ## ⚙️ How it works
 - Input number of teams (even number) and locations.
 - Each location hosts maximum 2 teams per round (can be empty).
@@ -43,6 +48,14 @@
    http://localhost:5000
    ```
 
+## ⚠️ Limitations
+- Teams must be an even number.
+- Teams must be less than or equal to 2 × locations.
+- Each team visits each location exactly once (rounds = number of locations).
+- Each location hosts at most one pair per round; empty locations are allowed.
+- The solver minimizes repeated matchups but does not guarantee zero repeats.
+- Runtime grows quickly with more teams/locations; expect longer solves for larger inputs.
+
 ## 📁 Project Structure
 ```
 team-rotation-app/
@@ -53,7 +66,7 @@ team-rotation-app/
 │   ├── manifest.json   # PWA manifest
 │   └── icons/          # App icons
 ├── requirements.txt    # Python dependencies
-├── .render.yaml        # Render.com deployment config
+├── railway.toml        # Railway deployment config
 └── README.md
 ```
 
@@ -104,35 +117,17 @@ This application uses **SQLite** for caching optimization results. Results are s
 8. **Result is saved to cache** for future requests
 9. Results are displayed in a table showing rounds and locations (empty locations shown as "—")
 
-## 🚀 Deploy to Render.com
+## 🚀 Deploy to Railway
 
-**Quick Deploy:**
+This repo includes `railway.toml` for Railway deployments.
 
 1. Push your code to GitHub
    ```bash
-   git push origin v1-simple
+   git push origin main
    ```
 
-2. Go to [render.com](https://render.com) and sign in with GitHub
+2. Create a new project in Railway and connect your repo
 
-3. Click **"New +"** → **"Web Service"**
+3. Railway will read `railway.toml` automatically
 
-4. Connect your repository: `team-rotation-app`
-
-5. Render will auto-detect `.render.yaml` configuration
-
-6. Click **"Create Web Service"**
-
-7. Wait for deployment (~2-3 minutes)
-
-8. Your app will be live at `https://team-rotation-app.onrender.com`
-
-**Important:** The free plan includes:
-- ✅ Persistent disk for SQLite (cache preserved)
-- ✅ HTTPS/SSL automatically
-- ✅ Custom domain support
-- ⚠️ Sleeps after 15 min of inactivity (first request takes ~30s)
-
-**For production:**
-- Upgrade to paid plan ($7/month) for always-on service
-- Or use Railway.app (similar setup, different pricing)
+4. Deploy and open the provided public URL

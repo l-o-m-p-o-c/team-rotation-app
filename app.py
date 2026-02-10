@@ -286,121 +286,108 @@ init_db()
 
 app = Flask(__name__)
 
-@app.route("/", methods=["GET", "POST"])
-def index():
+@app.route("/")
+def landing():
+    return render_template(
+        "landing.html",
+        version="v1.0.1"
+    )
+
+@app.route("/generator", methods=["GET", "POST"])
+def generator():
     result_data = None
     error_message = None
-    from_cache = False
-
-    if request.method == "GET" and request.args.get("locations") and request.args.get("teams"):
-        try:
-            L = int(request.args.get("locations"))
-            T = int(request.args.get("teams"))
-            variant_id = request.args.get("variant")
-            variant_id = int(variant_id) if variant_id else None
-        except (TypeError, ValueError):
-            error_message = "⚠️ Невалидни параметри в линка."
-            cache_index = get_cache_index()
-            return render_template("index.html", result=result_data, error=error_message, cache_index=cache_index)
-
-        cached = get_variant_by_id(L, T, variant_id) if variant_id else get_cached_result(L, T)
-        if cached:
-            LOCATIONS = [f"L{i+1}" for i in range(L)]
-            result_data = {
-                "rounds": cached["rounds_data"],
-                "locations": LOCATIONS,
-                "repeats": cached["repeats"],
-                "repeats_detail": cached["repeats_detail"],
-                "L": L,
-                "T": T,
-                "variant_id": cached["id"],
-                "from_cache": True,
-                "no_other_solution": False
-            }
-        else:
-            error_message = "⚠️ Няма кеширано решение за тези параметри."
-
-        cache_index = get_cache_index()
-        return render_template("index.html", result=result_data, error=error_message, cache_index=cache_index)
-    
-    if request.method == "POST":
-        L = int(request.form["locations"])
-        T = int(request.form["teams"])
-        force_new = request.form.get("force_new") == "1"
-        
-        # Валидация: отборите трябва да са четен брой
-        if T % 2 != 0:
-            error_message = f"⚠️ Броят на отборите трябва да бъде четно число. Текущо: {T}"
-            cache_index = get_cache_index()
-            return render_template("index.html", result=result_data, error=error_message, cache_index=cache_index)
-        
-        # Валидация: отборите не могат да са повече от двойния брой локации
-        if T > 2 * L:
-            error_message = f"⚠️ Броят на отборите ({T}) не може да е повече от двойния брой локации (2 × {L} = {2*L})"
-            cache_index = get_cache_index()
-            return render_template("index.html", result=result_data, error=error_message, cache_index=cache_index)
-
-        # 🔍 Проверка за кеширан резултат
-        cached_variants = get_cached_variants(L, T)
-        cached_latest = cached_variants[0] if cached_variants else None
-        if cached_latest and not force_new:
-            LOCATIONS = [f"L{i+1}" for i in range(L)]
-            result_data = {
-                "rounds": cached_latest["rounds_data"],
-                "locations": LOCATIONS,
-                "repeats": cached_latest["repeats"],
-                "repeats_detail": cached_latest["repeats_detail"],
-                "L": L,
-                "T": T,
-                "variant_id": cached_latest["id"],
-                "from_cache": True,
-                "no_other_solution": False
-            }
-            cache_index = get_cache_index()
-            return render_template("index.html", result=result_data, error=error_message, cache_index=cache_index)
-        cached_rounds = [v["rounds_data"] for v in cached_variants]
-        max_attempts = 8 if force_new and cached_rounds else 1
-        solved = None
-
-        for attempt in range(max_attempts):
-            seed = (time.time_ns() % 2147483647) + attempt
-            candidate = solve_instance(L, T, seed)
-            if candidate is None:
-                continue
-            if not cached_rounds or candidate["rounds"] not in cached_rounds:
-                solved = candidate
-                break
-
-        if solved:
-            save_result(L, T, solved["rounds"], solved["repeats"], solved["repeats_detail"])
-            result_data = {
-                "rounds": solved["rounds"],
-                "locations": solved["locations"],
-                "repeats": solved["repeats"],
-                "repeats_detail": solved["repeats_detail"],
-                "L": L,
-                "T": T,
-                "from_cache": False,
-                "no_other_solution": False
-            }
-        elif cached_latest is not None:
-            LOCATIONS = [f"L{i+1}" for i in range(L)]
-            result_data = {
-                "rounds": cached_latest["rounds_data"],
-                "locations": LOCATIONS,
-                "repeats": cached_latest["repeats"],
-                "repeats_detail": cached_latest["repeats_detail"],
-                "L": L,
-                "T": T,
-                "variant_id": cached_latest["id"],
-                "from_cache": True,
-                "no_other_solution": True
-            }
-        else:
-            error_message = f"⚠️ Не беше намерено решение за {T} отбора и {L} локации. Моля, опитайте с различни параметри."
-
     cache_index = get_cache_index()
-    return render_template("index.html", result=result_data, error=error_message, cache_index=cache_index)
+    all_variants = None
+    all_locations = None
+    no_more_variants = False
+
+    allowed_locations = list(range(1, 13))
+    allowed_teams = list(range(2, 25, 2))
+
+    L_raw = request.values.get("locations")
+    T_raw = request.values.get("teams")
+    variant_id_raw = request.values.get("variant")
+    current_variant_raw = request.form.get("current_variant_id")
+    action = request.form.get("action")
+    show_all = request.method == "GET" and request.args.get("show_all") == "1"
+
+    if L_raw and T_raw:
+        try:
+            L = int(L_raw)
+            T = int(T_raw)
+            variant_id = int(variant_id_raw) if variant_id_raw else None
+            current_variant_id = int(current_variant_raw) if current_variant_raw else None
+        except (TypeError, ValueError):
+            error_message = "⚠️ Невалидни параметри."
+            return render_template(
+                "index.html",
+                result=result_data,
+                error=error_message,
+                cache_index=cache_index,
+                allowed_locations=allowed_locations,
+                allowed_teams=allowed_teams,
+            )
+
+        if T % 2 != 0:
+            error_message = "⚠️ Броят на отборите трябва да бъде четно число."
+        elif T > 2 * L:
+            error_message = f"⚠️ Отборите ({T}) не могат да са повече от 2 × локации ({2*L})."
+
+        variants = get_cached_variants(L, T)
+        if not variants:
+            error_message = "⚠️ Няма кеширани решения за тези параметри."
+
+        if not error_message and variants:
+            selected = None
+
+            if variant_id:
+                selected = get_variant_by_id(L, T, variant_id)
+                if not selected:
+                    selected = variants[0]
+            elif action == "next" and current_variant_id:
+                ids = [v["id"] for v in variants]
+                try:
+                    idx = ids.index(current_variant_id)
+                except ValueError:
+                    idx = 0
+                if idx + 1 < len(variants):
+                    selected = variants[idx + 1]
+                else:
+                    selected = variants[idx]
+                    no_more_variants = True
+            else:
+                selected = variants[0]
+
+            if show_all:
+                all_variants = variants
+                all_locations = [f"L{i+1}" for i in range(L)]
+                result_data = None
+                no_more_variants = False
+            elif selected:
+                LOCATIONS = [f"L{i+1}" for i in range(L)]
+                result_data = {
+                    "rounds": selected["rounds_data"],
+                    "locations": LOCATIONS,
+                    "repeats": selected["repeats"],
+                    "repeats_detail": selected["repeats_detail"],
+                    "L": L,
+                    "T": T,
+                    "variant_id": selected["id"],
+                    "from_cache": True
+                }
+
+    return render_template(
+        "index.html",
+        result=result_data,
+        error=error_message,
+        cache_index=cache_index,
+        allowed_locations=allowed_locations,
+        allowed_teams=allowed_teams,
+        no_more_variants=no_more_variants,
+        all_variants=all_variants,
+        all_locations=all_locations,
+    )
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))  # Render задава порта автоматично
